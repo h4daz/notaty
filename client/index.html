@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notat App</title>
+</head>
+<body>
+
+<h1>Notat App</h1>
+
+<h2>Lag notat</h2>
+<input id="noteTitle" placeholder="Tittel">
+<br>
+<textarea id="noteContent" placeholder="Innhold"></textarea>
+<br>
+<button onclick="createNote()">Lagre notat</button>
+
+<h2>Lag todo</h2>
+<input id="todoTitle" placeholder="Tittel">
+<input id="todoTask" placeholder="Oppgave">
+<button onclick="addTask()">Legg til oppgave</button>
+<ul id="taskList"></ul>
+<button onclick="createTodo()">Lagre todo</button>
+
+<h2>Data</h2>
+<button onclick="loadData()">Hent data</button>
+<pre id="output"></pre>
+
+<script src="script.js"></script>
+</body>
+</html>
