@@ -40,3 +40,6 @@ def save_data(data: Item):
         json.dump(file_data, f, indent=4)
 
     return {"status": "success"}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
