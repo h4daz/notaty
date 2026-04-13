@@ -1,4 +1,4 @@
-  // --- DOM ELEMENTS ---
+  //  DOM ELEMENTS
   const tabBtns = document.querySelectorAll('.tab-btn');
   const tabSections = document.querySelectorAll('.tab-section');
   const noteForm = document.getElementById('note-form');
@@ -9,7 +9,7 @@
   const todosList = document.getElementById('todos-list');
   const toast = document.getElementById('toast');
 
-  // --- TAB LOGIC ---
+  // LAB LOGIC
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       tabBtns.forEach(b => b.classList.remove('active'));
@@ -19,7 +19,7 @@
     });
   });
 
-  // --- TASK INPUT MANAGEMENT ---
+  //  TASK INPUT MANAGEMENT 
   addTaskBtn.addEventListener('click', () => {
     const row = document.createElement('div');
     row.className = 'task-input-row';
@@ -34,7 +34,7 @@
     if (e.target.classList.contains('btn-remove-task')) e.target.parentElement.remove();
   });
 
-  // --- CORE FUNCTIONALITY ---
+  //  CORE FUNCTIONALITY
   function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
@@ -64,7 +64,7 @@
     `).join('') : '<p class="empty-state">Ingen lister ennå.</p>';
   }
 
-  // --- FORM SUBMISSIONS ---
+  //  FORM SUBMISSIONS 
   noteForm.addEventListener('submit', (e) => {
     e.preventDefault();
     saveData('notes', {
