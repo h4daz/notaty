@@ -1,30 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="no">
 <head>
-    <title>Notat App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOTAT — Notater & Lister</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-<h1>Notat App</h1>
+  <header>
+    <div class="header-inner">
+      <div class="logo">NOTAT</div>
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="notes"> Notater</button>
+        <button class="tab-btn" data-tab="todos"> Todo-lister</button>
+      </nav>
+    </div>
+  </header>
 
-<h2>Lag notat</h2>
-<input id="noteTitle" placeholder="Tittel">
-<br>
-<textarea id="noteContent" placeholder="Innhold"></textarea>
-<br>
-<button onclick="createNote()">Lagre notat</button>
+  <main>
 
-<h2>Lag todo</h2>
-<input id="todoTitle" placeholder="Tittel">
-<input id="todoTask" placeholder="Oppgave">
-<button onclick="addTask()">Legg til oppgave</button>
-<ul id="taskList"></ul>
-<button onclick="createTodo()">Lagre todo</button>
+    <!-- ── NOTES TAB ──────────────────────────────────────────── -->
+    <section id="tab-notes" class="tab-section active">
+      <div class="two-col">
 
-<h2>Data</h2>
-<button onclick="loadData()">Hent data</button>
-<pre id="output"></pre>
+        <div class="panel">
+          <h2 class="panel-title">Nytt notat</h2>
+          <form id="note-form" class="card-form">
+            <div class="field">
+              <label for="note-title">Tittel</label>
+              <input id="note-title" type="text" placeholder="Tittel på notatet…" required />
+            </div>
+            <div class="field">
+              <label for="note-content">Innhold</label>
+              <textarea id="note-content" rows="6" placeholder="Skriv innholdet ditt her…" required></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Lagre notat</button>
+          </form>
+        </div>
 
-<script src="script.js"></script>
+        <div class="panel">
+          <h2 class="panel-title">Lagrede notater</h2>
+          <div id="notes-list" class="items-list">
+            <p class="empty-state">Ingen notater ennå.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── TODOS TAB ──────────────────────────────────────────── -->
+    <section id="tab-todos" class="tab-section">
+      <div class="two-col">
+
+        <div class="panel">
+          <h2 class="panel-title">Ny todo-liste</h2>
+          <form id="todo-form" class="card-form">
+            <div class="field">
+              <label for="todo-title">Tittel</label>
+              <input id="todo-title" type="text" placeholder="Navn på listen…" required />
+            </div>
+            <div class="field">
+              <label>Oppgaver</label>
+              <div id="task-inputs">
+                <div class="task-input-row">
+                  <input type="text" class="task-input" placeholder="Oppgave 1…" />
+                  <button type="button" class="btn-remove-task" title="Fjern">✕</button>
+                </div>
+              </div>
+              <button type="button" id="add-task-btn" class="btn-ghost">+ Legg til oppgave</button>
+            </div>
+            <button type="submit" class="btn-primary">Lagre liste</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">Lagrede lister</h2>
+          <div id="todos-list" class="items-list">
+            <p class="empty-state">Ingen todo-lister ennå.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="script.js"></script>
 </body>
 </html>

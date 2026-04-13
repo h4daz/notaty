@@ -1,65 +1,42 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 import json
-import os
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-app = Flask(__name__)
-CORS(app)
-
+app = FastAPI()
 DATA_FILE = "data.json"
 
-# Opprett fil hvis den ikke finnes
-if not os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "w") as f:
-        json.dump({"notes": [], "todos": []}, f)
+
+class Item(BaseModel):
+    type: str
+    item: str
 
 
-def load_data():
-    with open(DATA_FILE, "r") as f:
-        return json.load(f)
+@app.get("/")
+def root():
+    return {"message": "API is running"}
 
 
-def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
-
-# -------------------------
-# GET: Hent alt
-# -------------------------
-@app.route("/api/data", methods=["GET"])
+@app.get("/get_data")
 def get_data():
-    data = load_data()
-    return jsonify(data)
+    try:
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {"notes": [], "todos": []}
 
 
-# -------------------------
-# POST: Lag tekstnotat
-# -------------------------
-@app.route("/api/notes", methods=["POST"])
-def create_note():
-    data = load_data()
-    new_note = request.json
+@app.post("/save_data")
+def save_data(data: Item):
+    try:
+        with open(DATA_FILE, "r") as f:
+            file_data = json.load(f)
+    except FileNotFoundError:
+        file_data = {"notes": [], "todos": []}
 
-    data["notes"].append(new_note)
-    save_data(data)
+    if data.type in file_data:
+        file_data[data.type].append(data.item)
 
-    return jsonify({"message": "Notat lagret!"})
+    with open(DATA_FILE, "w") as f:
+        json.dump(file_data, f, indent=4)
 
-
-# -------------------------
-# POST: Lag todo-liste
-# -------------------------
-@app.route("/api/todos", methods=["POST"])
-def create_todo():
-    data = load_data()
-    new_todo = request.json
-
-    data["todos"].append(new_todo)
-    save_data(data)
-
-    return jsonify({"message": "Todo lagret!"})
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return {"status": "success"}
