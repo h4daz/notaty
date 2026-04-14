@@ -1,6 +1,8 @@
 import json
 from fastapi import FastAPI
 from pydantic import BaseModel
+from flask import Flask, render_template
+
 
 app = FastAPI()
 DATA_FILE = "data.json"
@@ -13,7 +15,7 @@ class Item(BaseModel):
 
 @app.get("/")
 def root():
-    return {"message": "API is running"}
+    return render_template('index.html')
 
 
 @app.get("/get_data")
