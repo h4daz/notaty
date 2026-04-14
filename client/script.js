@@ -5,7 +5,7 @@
   const todoForm = document.getElementById('todo-form');
   const addTaskBtn = document.getElementById('add-task-btn');
   const taskInputsContainer = document.getElementById('task-inputs');
-  const notesList = document.getElementById('notes-list');
+  const notesList = document.getElementById('notes-list'); 
   const todosList = document.getElementById('todos-list');
   const toast = document.getElementById('toast');
 
