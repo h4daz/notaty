@@ -10,10 +10,9 @@ app = FastAPI()
 # Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLIENT_DIR = os.path.join(BASE_DIR, "client")
-DATA_FILE = os.path.join(os.path.dirname(__file__), "data.json")
+DATA_FILE = os.path.join(BASE_DIR, "server", "data.json")
 
-
-# Serve static files (JS, CSS if any)
+# Serve static files (CSS + JS)
 app.mount("/client", StaticFiles(directory=CLIENT_DIR), name="client")
 
 
@@ -22,7 +21,7 @@ class Item(BaseModel):
     item: str
 
 
-# Serve index.html
+# Serve frontend
 @app.get("/")
 def root():
     return FileResponse(os.path.join(CLIENT_DIR, "index.html"))
