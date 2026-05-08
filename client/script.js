@@ -1,7 +1,5 @@
-// venter på at html er ferdig lastet. call back function 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // DOM ELEMENTS, dette er sån at ref for buttons, liste ui.
   const tabBtns = document.querySelectorAll('.tab-btn');
   const tabSections = document.querySelectorAll('.tab-section');
   const noteForm = document.getElementById('note-form');
@@ -12,12 +10,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const todosList = document.getElementById('todos-list');
   const toast = document.getElementById('toast');
 
-  // TAB SWITCHING, gjør at man bytter fra notes til todo 
+  // legg til editing-label i begge forms
+  const noteEditLabel = document.createElement('p');
+  noteEditLabel.className = 'editing-label';
+  noteEditLabel.textContent = ' EDIT Redigerer notat';
+  noteForm.prepend(noteEditLabel);
+
+  const todoEditLabel = document.createElement('p');
+  todoEditLabel.className = 'editing-label';
+  todoEditLabel.textContent = ' EDIT Redigerer liste';
+  todoForm.prepend(todoEditLabel);
+
+  // holder styr på om vi redigerer
+  let editingNote = null; // index eller null
+  let editingTodo = null;
+
+  // TAB SWITCHING
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       tabBtns.forEach(b => b.classList.remove('active'));
       tabSections.forEach(s => s.classList.remove('active'));
-
       btn.classList.add('active');
       document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
     });
@@ -34,24 +46,21 @@ document.addEventListener("DOMContentLoaded", () => {
     taskInputsContainer.appendChild(row);
   });
 
-  // REMOVE TASK ROW, fjerner en oppgave fra todo-listen
+  // REMOVE TASK ROW
   taskInputsContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-remove-task')) {
       e.target.parentElement.remove();
     }
   });
 
-  // TOAST, viser en midlertidig melding til brukeren 
+  // TOAST
   function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
-
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 2000);
+    setTimeout(() => toast.classList.remove('show'), 2000);
   }
 
-  // LOCAL STORAGE SAVE, lagrer data i nettleserens local storage
+  // SAVE (ny)
   function saveData(key, item) {
     const data = JSON.parse(localStorage.getItem(key) || '[]');
     data.push(item);
@@ -59,68 +68,122 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAll();
   }
 
-  // DELETE ITEM, fjerner en oppgave fra todo listen eller et notat
+  // UPDATE (rediger eksisterende)
+  function updateData(key, index, item) {
+    const data = JSON.parse(localStorage.getItem(key) || '[]');
+    data[index] = item;
+    localStorage.setItem(key, JSON.stringify(data));
+    renderAll();
+  }
+
+  // DELETE
   function deleteItem(key, index) {
     const data = JSON.parse(localStorage.getItem(key) || '[]');
     data.splice(index, 1);
     localStorage.setItem(key, JSON.stringify(data));
-
     showToast("Slettet!");
     renderAll();
   }
 
-  // RENDER EVERYTHING, viser lagrede notater og todo lister
+  // EDIT NOTE — fyller inn skjemaet med eksisterende data
+  function editNote(index) {
+    // string hvis ikke bruker har lagret noe enda, så fallback til tom array
+    const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+    const n = notes[index];
+    document.getElementById('note-title').value = n.title;
+    document.getElementById('note-content').value = n.content;
+    editingNote = index;
+    noteForm.classList.add('editing');  
+    // scroll til skjemaet
+    noteForm.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // EDIT TODO — fyller inn skjemaet med eksisterende data
+  function editTodo(index) {
+    const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+    const t = todos[index];
+    document.getElementById('todo-title').value = t.title;
+
+    // bytt til todos-tab
+    tabBtns.forEach(b => b.classList.remove('active'));
+    tabSections.forEach(s => s.classList.remove('active'));
+    document.querySelector('[data-tab="todos"]').classList.add('active');
+    document.getElementById('tab-todos').classList.add('active');
+
+    // fyll inn oppgavene
+    taskInputsContainer.innerHTML = t.tasks.map(task => `
+      <div class="task-input-row">
+        <input type="text" class="task-input" placeholder="Oppgave..." value="${task}" />
+        <button type="button" class="btn-remove-task">✕</button>
+      </div>
+    `).join('');
+
+    editingTodo = index;
+    todoForm.classList.add('editing');
+    todoForm.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // RENDER
   function renderAll() {
     const notes = JSON.parse(localStorage.getItem('notes') || '[]');
     const todos = JSON.parse(localStorage.getItem('todos') || '[]');
 
-    // NOTES, renderer lagrede notater
     notesList.innerHTML = notes.length
       ? notes.map((n, index) => `
-        <div class="card">
+        <div class="card item-card">
           <div class="card-header">
-            <h3>${n.title}</h3>
-            <button class="btn-delete" onclick="window.deleteItem('notes', ${index})">🗑️</button>
+            <h3 class="item-title">${n.title}</h3>
+            <div>
+              <button class="btn-edit" onclick="window.editNote(${index})">EDIT</button>
+              <button class="btn-delete" onclick="window.deleteItem('notes', ${index})">X</button>
+            </div>
           </div>
-          <p>${n.content}</p>
+          <p class="note-content">${n.content}</p>
         </div>
       `).join('')
       : '<p class="empty-state">Ingen notater ennå.</p>';
-        
 
-    // TODOS, renderer lagrede todo lister
     todosList.innerHTML = todos.length
       ? todos.map((t, index) => `
-        <div class="card">
+        <div class="card item-card">
           <div class="card-header">
-            <h3>${t.title}</h3>
-            <button class="btn-delete" onclick="window.deleteItem('todos', ${index})">🗑️</button>
+            <h3 class="item-title">${t.title}</h3>
+            <div>
+              <button class="btn-edit" onclick="window.editTodo(${index})">EDIT</button>
+              <button class="btn-delete" onclick="window.deleteItem('todos', ${index})">X</button>
+            </div>
           </div>
           <ul style="padding-left: 20px;">
             ${t.tasks.map(task => `<li>${task}</li>`).join('')}
           </ul>
         </div>
       `).join('')
-      : '<p class="empty-state">Ingen lister ennå.</p>';
+      : '<p class="empty-state">Ingen todo-lister ennå.</p>';
   }
 
-  // FORMS, håndterer innsending av notater og todo lister
-
+  // NOTE FORM SUBMIT
   noteForm.addEventListener('submit', (e) => {
     e.preventDefault();
-
-    saveData('notes', {
+    const item = {
       title: document.getElementById('note-title').value,
       content: document.getElementById('note-content').value
-    });
+    };
 
+    if (editingNote !== null) {
+      updateData('notes', editingNote, item);
+      editingNote = null;
+      noteForm.classList.remove('editing');
+      showToast("Notat oppdatert!");
+    } else {
+      saveData('notes', item);
+      showToast("Notat lagret!");
+    }
     noteForm.reset();
-    showToast("Notat lagret!");
   });
 
+  // TODO FORM SUBMIT
   todoForm.addEventListener('submit', (e) => {
     e.preventDefault();
-
     const tasks = Array.from(document.querySelectorAll('.task-input'))
       .map(i => i.value.trim())
       .filter(v => v);
@@ -130,27 +193,33 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    saveData('todos', {
+    const item = {
       title: document.getElementById('todo-title').value,
       tasks
-    });
+    };
+
+    if (editingTodo !== null) {
+      updateData('todos', editingTodo, item);
+      editingTodo = null;
+      todoForm.classList.remove('editing');
+      showToast("Liste oppdatert!");
+    } else {
+      saveData('todos', item);
+      showToast("Liste lagret!");
+    }
 
     todoForm.reset();
-
     taskInputsContainer.innerHTML = `
       <div class="task-input-row">
         <input type="text" class="task-input" placeholder="Oppgave..." />
         <button type="button" class="btn-remove-task">✕</button>
       </div>
     `;
-
-    showToast("Liste lagret!");
   });
 
-  // expose delete function globally (needed for onclick)
   window.deleteItem = deleteItem;
+  window.editNote = editNote;
+  window.editTodo = editTodo;
 
-  // INIT, local saved data når siden lastes
   renderAll();
-
 });
